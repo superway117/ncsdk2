@@ -1,0 +1,19 @@
+# ignore build directories and any files in build directories
+build/
+
+# ignore any qt-creator user files for cmake projects.  these are files
+# specific to a user and specific to qt-creator
+CMakeLists.txt.user
+
+# self
+.gitattributes
+
+# ctag
+.tags
+.tags_sorted_by_file
+
+# obj
+.o
+.dll
+.lib
+.so
