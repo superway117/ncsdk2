@@ -1,0 +1,18 @@
+[
+  {
+    "connectcode":"a",
+    "vaname":"car",
+    "graph_paths":[
+        "../../test_files/movidius/204/graph/googlenet.graph",
+    ],
+    "tensor":"../../test_files/movidius/204/pic/nps_acoustic_guitar.png",
+    "sw":"",
+    "dev_idx":0,
+    "run_mode":"sync",
+    "inference_times": 10,
+    "run_times": 1,
+    "ion": 0,
+    "to_format":"FP16",
+    "class_num":9,
+  }
+]

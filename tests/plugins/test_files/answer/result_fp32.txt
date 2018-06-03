@@ -1,0 +1,37 @@
+1_487_0.986328_SAIC MG : MG5 : MG5 2012
+2_734_1.000000_Imported Volvo : V40 : V40 Imported 2014
+3_280_1.000000_JMC : Baodian : Baodian 2.8T 柴油双驱 2007
+4_180_0.998047_Shanghai GM Buick : Regal : Regal 2012
+5_959_1.000000_FAW VW Audi : A6L : A6L 2012
+6_378_0.395996_Beijing Benz : GLK : GLK200 Standard Edition 2014
+7_719_1.000000_SHAC : Istana : Istana 2005
+8_576_1.000000_BAIC : Flag bell : Flag bell 2012
+9_189_1.000000_HAFEI MOTO : Mingyi : Mingyi 2009
+10_512_1.000000_Dongfeng Nissan : SYLPHY : SYLPHY 2009
+11_823_1.000000_Dongfeng Honda : CRV : CRV 2012
+12_498_0.502930_Beijing Hyundai : ix35MOINCA : ix35MOINCA 2009
+13_87_0.503418_Imported BMW : X5 : X5 30I Imported 2008
+14_540_1.000000_JMC Ford : Transit : Transit 2006
+15_105_1.000000_Imported Benz : S : S400L Imported 2010
+16_546_1.000000_Shanghai GM Buick : Excelle : Excelle GT 2010
+17_811_1.000000_Shanghai VW : Santana : Santana2000 1998
+18_526_1.000000_Imported Buick : Sail : Sail SRV three box Imported 2003
+19_358_0.991211_GAC Honda : Accord : Accord 2011
+20_367_0.856934_Imported Mazda : Mazda 6 : Mazda 6 Imported 2005
+21_401_1.000000_SGMW : Wuling Hongguang S1 : Wuling Hongguang S1 Comfort Edition 2010
+22_654_1.000000_FAW TOYOTA : Corolla : Corolla 2007
+23_105_1.000000_Imported Benz : S : S400L Imported 2010
+24_28_0.962402_FAW TOYOTA : REIZ : REIZ 2005
+25_481_0.519043_DYK : SPORTAGE-R : SPORTAGE-R GLS 2012
+26_870_0.760254_Imported Audi : A8 : A8 Imported 2013
+27_957_0.985352_FAW VW Audi : A6L : A6L Honorable Edition 2006
+28_341_0.652832_Shanghai GM Chevy : Epica : Epica SE 2007
+29_471_1.000000_Shanghai GM Buick : GL8 : GL8 2014
+30_184_1.000000_ChangAng : Xingguang : Xingguang4500 2009
+31_11_1.000000_Changan Mazda : Mazda 3 : Mazda 3 2006
+32_81_0.845703_Imported Nissan : SYLPHY : SYLPHY Imported 2004
+33_592_0.995117_Imported VW : Golf : Golf Imported 2015
+34_0_0.999023_FOTON Truck : OLLIN TX : OLLIN TX 2010
+35_546_1.000000_Shanghai GM Buick : Excelle : Excelle GT 2010
+36_957_0.881836_FAW VW Audi : A6L : A6L Honorable Edition 2006
+37_469_1.000000_Shanghai GM Buick : GL8 : GL8 Lu Zun 2005

@@ -234,9 +234,9 @@ ncStatus_t ncDeviceCreate(int index, struct ncDeviceHandle_t **deviceHandle)
     if (!initialized)
         initialize();
 
-    XLinkError_t rc = XLinkGetDeviceName(index, name, NC_MAX_NAME_SIZE);
+    XLinkError_t rc = XLinkGetUnbootDeviceName(index, name, NC_MAX_NAME_SIZE);
     pthread_mutex_unlock(&globalMutex);
-
+    mvLog(MVLOG_INFO, "name=%s\n",name);
     if (rc == X_LINK_SUCCESS) {
         struct ncDeviceHandle_t *dH = calloc(1, sizeof(*dH));
         struct _devicePrivate_t *d = calloc(1, sizeof(*d));
@@ -420,29 +420,39 @@ ncStatus_t ncDeviceOpen(struct ncDeviceHandle_t * deviceHandle)
     else
         mvLog(MVLOG_INFO, "%s() XLinkBootRemote returned success %d\n", __func__, rc);
 
+    mvLog(MVLOG_INFO, "d->dev_addr=%s\n", d->dev_addr);
+    mvLog(MVLOG_INFO, "d->dev_addr2=%s\n", d->dev_addr2);
+    
     double waittm = timeInSeconds() + STATUS_WAIT_TIMEOUT;
     while (timeInSeconds() < waittm && rc == 0) {
         XLinkHandler_t *handler = calloc(1, sizeof(XLinkHandler_t));
 
         handler->devicePath = (char *) d->dev_addr;
         rc = XLinkConnect(handler);
+        mvLog(MVLOG_INFO, "d->dev_addr=%s\n", d->dev_addr);
+        mvLog(MVLOG_INFO, "d->dev_addr2=%s\n", d->dev_addr2);
+    
         if (rc != X_LINK_SUCCESS) {
             //we might fail in case name changed after boot
             int count = 0;
             while (1) {
                 name2[0] = '\0';
                 sleep(1);
-                rc = XLinkGetDeviceName(count, name2, NC_MAX_NAME_SIZE);
+                rc = XLinkGetBootDeviceName(count, name2, NC_MAX_NAME_SIZE);
+                mvLog(MVLOG_INFO, "[%s:%d] name2 = %s\n", __func__,__LINE__, name2);
+
                 if (rc != X_LINK_SUCCESS)
                     break;
-                handler->devicePath = (char *) name2;
-                if (isDeviceOpened(name2)) {
+                if (isDeviceOpened(name2)==0) {
+                    mvLog(MVLOG_INFO, "[%s:%d] opened\n", __func__,__LINE__);
+
                     continue;
                 }
-
+                handler->devicePath = (char *) name2;
                 rc = XLinkConnect(handler);
                 sleep(1);
                 if (isDeviceOpened(name2) < 0 && rc == X_LINK_SUCCESS) {
+                    mvLog(MVLOG_INFO, "[%s:%d] opened\n", __func__,__LINE__);
                     break;
                 }
                 
