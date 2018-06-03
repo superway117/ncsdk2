@@ -48,6 +48,8 @@ XLinkError_t XLinkCloseStream(streamId_t streamId);
 XLinkError_t XLinkGetAvailableStreams(linkId_t id);
 
 XLinkError_t XLinkGetDeviceName(int index, char* name, int nameSize);
+XLinkError_t XLinkGetBootDeviceName(int index, char* name, int nameSize);
+XLinkError_t XLinkGetUnbootDeviceName(int index, char* name, int nameSize);
 
 // Send a package to initiate the writing of data to a remote stream
 // Note that the actual size of the written data is ALIGN_UP(size, 64)

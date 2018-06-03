@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <arpa/inet.h>
+#include <pthread.h>
 #define MVLOG_UNIT_NAME xLinkConsole
 #include "mvLog.h"
 
@@ -42,7 +43,7 @@ void* shellThreadWriter(void* ctx){
         char str[100];
         int bytes = read(connfd,str, 100);
         if (bytes > 0){
-            XLinkWriteData(cId, str, bytes);
+            XLinkWriteData(cId, (const uint8_t*)str, bytes);
         }else
             perror("read");
     }
@@ -80,10 +81,12 @@ void* shellThreadReader(void* ctx){
     context[1] = connfd;
     streamPacketDesc_t *packet;
     pthread_create(&shellWriter, NULL, shellThreadWriter, (void*) context);
-
+    int ret = 0;
     while(1){
         XLinkReadData(cId, &packet);
-        write(connfd, packet->data, packet->length);
+        ret = write(connfd, packet->data, packet->length);
+        if(ret<0)
+            mvLog(MVLOG_INFO, "failed to write data\n");
         XLinkReleaseData(cId);
     }
 }

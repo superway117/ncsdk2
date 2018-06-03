@@ -315,6 +315,36 @@ int UsbLinkPlatformGetDeviceName(int index, char* name, int nameSize)
             return USB_LINK_PLATFORM_ERROR;
     }
 }
+
+int UsbLinkPlatformGetBootDeviceName(int index, char* name, int nameSize)
+{
+    usbBootError_t rc = usb_find_device(index, name, nameSize, 0, DEFAULT_OPENVID, DEFAULT_OPENPID);
+    switch(rc) {
+        case USB_BOOT_SUCCESS:
+            return USB_LINK_PLATFORM_SUCCESS;
+        case USB_BOOT_DEVICE_NOT_FOUND:
+            return USB_LINK_PLATFORM_DEVICE_NOT_FOUND;
+        case USB_BOOT_TIMEOUT:
+            return USB_LINK_PLATFORM_TIMEOUT;
+        default:
+            return USB_LINK_PLATFORM_ERROR;
+    }
+}
+
+int UsbLinkPlatformGetUnbootDeviceName(int index, char* name, int nameSize)
+{
+    usbBootError_t rc = usb_find_device(index, name, nameSize, 0, DEFAULT_VID, DEFAULT_UNBOOTPID_2485);
+    switch(rc) {
+        case USB_BOOT_SUCCESS:
+            return USB_LINK_PLATFORM_SUCCESS;
+        case USB_BOOT_DEVICE_NOT_FOUND:
+            return USB_LINK_PLATFORM_DEVICE_NOT_FOUND;
+        case USB_BOOT_TIMEOUT:
+            return USB_LINK_PLATFORM_TIMEOUT;
+        default:
+            return USB_LINK_PLATFORM_ERROR;
+    }
+}
 //#define XLINK_NO_BOOT
 int UsbLinkPlatformBootRemote(const char* deviceName, const char* binaryPath)
 {
@@ -481,9 +511,11 @@ int UsbLinkPlatformConnect(const char* devPathRead, const char* devPathWrite, vo
     return 0;
 #endif  /*USE_LINK_JTAG*/
 #else
+    //prepare open 9.2-ma2480
     *fd = usblink_open(devPathWrite);
     if (*fd == 0)
     {
+         
        /* could fail due to port name change */
        //printf("fail\n");
        return -1;
@@ -493,7 +525,10 @@ int UsbLinkPlatformConnect(const char* devPathRead, const char* devPathWrite, vo
     if(*fd)
         return 0;
     else
+    {
+         
         return -1;
+    }
 #endif  /*USE_USB_VSC*/
 }
 int UsbLinkPlatformInit(int loglevel)

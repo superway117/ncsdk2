@@ -49,6 +49,16 @@ int UsbLinkPlatformGetDeviceName(int index,
                                  char* name,
                                  int nameSize);
 
+
+int UsbLinkPlatformGetUnbootDeviceName(int index,
+                                 char* name,
+                                 int nameSize);
+
+
+int UsbLinkPlatformGetBootDeviceName(int index,
+                                 char* name,
+                                 int nameSize);
+
 int UsbLinkPlatformBootRemote(const char* deviceName,
                                 const char* binaryPath);
 int USBLinkPlatformResetRemote(void* fd);

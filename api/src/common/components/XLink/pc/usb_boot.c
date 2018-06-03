@@ -39,6 +39,7 @@
 #include <libusb.h>
 #endif
 #include "usb_boot.h"
+#include "mvLog.h"
 
 
 
@@ -168,7 +169,7 @@ static int is_pid_supported(int pid)
     return 0;
 }
 
-#if (!defined(_WIN32) && !defined(_WIN64) )
+
 static const char *gen_addr(libusb_device *dev, int pid)
 {
     static char buff[4 * 7 + 7];    // '255-' x 7 (also gives us nul-terminator for last entry)
@@ -181,17 +182,24 @@ static const char *gen_addr(libusb_device *dev, int pid)
     if (pnum_cnt == LIBUSB_ERROR_OVERFLOW) {
         // shouldn't happen!
         strcpy(buff, "<error>");
-        return buff;
+        return NULL;
     }
     p = buff;
+
+    uint8_t bus = libusb_get_bus_number(dev);
+    p += sprintf(p, "%u.", bus);
     for (i = 0; i < pnum_cnt - 1; i++)
         p += sprintf(p, "%u.", pnums[i]);
-    p += sprintf(p, "%u", pnums[i]);
 
-    sprintf(p, "-%s", get_pid_name(pid));
+    p += sprintf(p, "%u", pnums[i]);
+    const char* dev_name = get_pid_name(pid);
+
+    if ( strcmp(dev_name, ""))
+        sprintf(p, "-%s", dev_name);
+
     return buff;
 }
-#endif
+
 // if device is NULL, return device address for device at index idx
 // if device is not NULL, search by name and return device struct
 usbBootError_t usb_find_device(unsigned idx, char *addr, unsigned addrsize, void **device, int vid, int pid)
@@ -256,7 +264,7 @@ usbBootError_t usb_find_device(unsigned idx, char *addr, unsigned addrsize, void
             if (device)
             {
                 const char *caddr = &devs[res][4];
-                if (!strcmp(caddr, addr))
+                if (strstr(caddr, addr))
                 {
                     if (usb_loglevel > 1)
                         fprintf(stderr, "Found Address: %s - VID/PID %04x:%04x\n", addr, (int)(devs[res][0] << 8 | devs[res][1]), (int)(devs[res][2] << 8 | devs[res][3]));
@@ -295,6 +303,8 @@ usbBootError_t usb_find_device(unsigned idx, char *addr, unsigned addrsize, void
                 const char *caddr = gen_addr(dev, get_pid_by_name(addr));
                 if(!strcmp(caddr, addr))
                 {
+                    mvLog(MVLOG_INFO,"caddr=%s\n",caddr);
+                    mvLog(MVLOG_INFO, "Device %d Address: %s - VID/PID %04x:%04x\n", idx, caddr, desc.idVendor, desc.idProduct);
                     if(usb_loglevel > 1)
                         fprintf(stderr, "Found Address: %s - VID/PID %04x:%04x\n", addr, desc.idVendor, desc.idProduct);
                     libusb_ref_device(dev);
@@ -306,8 +316,10 @@ usbBootError_t usb_find_device(unsigned idx, char *addr, unsigned addrsize, void
             } else if(idx == count)
             {
                 const char *caddr = gen_addr(dev, desc.idProduct);
-                if (usb_loglevel > 1)
-                    fprintf(stderr, "Device %d Address: %s - VID/PID %04x:%04x\n", idx, caddr, desc.idVendor, desc.idProduct);
+                mvLog(MVLOG_INFO,"caddr=%s\n",caddr);
+                mvLog(MVLOG_INFO, "Device %d Address: %s - VID/PID %04x:%04x\n", idx, caddr, desc.idVendor, desc.idProduct);
+                //if (usb_loglevel > 1)
+                //    fprintf(stderr, "Device %d Address: %s - VID/PID %04x:%04x\n", idx, caddr, desc.idVendor, desc.idProduct);
                 strncpy(addr, caddr, addrsize);
                 return USB_BOOT_SUCCESS;
             }

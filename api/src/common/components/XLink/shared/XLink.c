@@ -970,6 +970,39 @@ XLinkError_t XLinkGetDeviceName(int index, char* name, int nameSize)
     }
 }
 
+XLinkError_t XLinkGetBootDeviceName(int index, char* name, int nameSize)
+{
+    int rc = UsbLinkPlatformGetBootDeviceName(index, name, nameSize);
+    switch(rc) {
+        case USB_LINK_PLATFORM_SUCCESS:
+            return X_LINK_SUCCESS;
+        case USB_LINK_PLATFORM_DEVICE_NOT_FOUND:
+            return X_LINK_DEVICE_NOT_FOUND;
+        case USB_LINK_PLATFORM_TIMEOUT:
+            return X_LINK_TIMEOUT;
+        default:
+            return X_LINK_ERROR;
+
+    }
+}
+
+
+XLinkError_t XLinkGetUnbootDeviceName(int index, char* name, int nameSize)
+{
+    int rc = UsbLinkPlatformGetUnbootDeviceName(index, name, nameSize);
+    switch(rc) {
+        case USB_LINK_PLATFORM_SUCCESS:
+            return X_LINK_SUCCESS;
+        case USB_LINK_PLATFORM_DEVICE_NOT_FOUND:
+            return X_LINK_DEVICE_NOT_FOUND;
+        case USB_LINK_PLATFORM_TIMEOUT:
+            return X_LINK_TIMEOUT;
+        default:
+            return X_LINK_ERROR;
+
+    }
+}
+
 XLinkError_t XLinkWriteData(streamId_t streamId, const uint8_t* buffer,
                             int size)
 {
