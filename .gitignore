@@ -1,5 +1,6 @@
 # ignore build directories and any files in build directories
 build/
+obj-x86_64/
 
 # ignore any qt-creator user files for cmake projects.  these are files
 # specific to a user and specific to qt-creator
@@ -17,4 +18,13 @@ CMakeLists.txt.user
 *.dll
 *.lib
 *.so
+*.so.0
 *.o.cmd
+
+
+# test
+movi_async
+movi_sync
+movi_slow
+movi_graph
+movi_multigraph
