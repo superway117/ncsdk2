@@ -169,7 +169,7 @@ static int is_pid_supported(int pid)
     return 0;
 }
 
-
+#if (!defined(_WIN32) && !defined(_WIN64) )
 static const char *gen_addr(libusb_device *dev, int pid)
 {
     static char buff[4 * 7 + 7];    // '255-' x 7 (also gives us nul-terminator for last entry)
@@ -199,7 +199,7 @@ static const char *gen_addr(libusb_device *dev, int pid)
 
     return buff;
 }
-
+#endif
 // if device is NULL, return device address for device at index idx
 // if device is not NULL, search by name and return device struct
 usbBootError_t usb_find_device(unsigned idx, char *addr, unsigned addrsize, void **device, int vid, int pid)
@@ -303,8 +303,6 @@ usbBootError_t usb_find_device(unsigned idx, char *addr, unsigned addrsize, void
                 const char *caddr = gen_addr(dev, get_pid_by_name(addr));
                 if(!strcmp(caddr, addr))
                 {
-                    mvLog(MVLOG_INFO,"caddr=%s\n",caddr);
-                    mvLog(MVLOG_INFO, "Device %d Address: %s - VID/PID %04x:%04x\n", idx, caddr, desc.idVendor, desc.idProduct);
                     if(usb_loglevel > 1)
                         fprintf(stderr, "Found Address: %s - VID/PID %04x:%04x\n", addr, desc.idVendor, desc.idProduct);
                     libusb_ref_device(dev);
@@ -316,10 +314,8 @@ usbBootError_t usb_find_device(unsigned idx, char *addr, unsigned addrsize, void
             } else if(idx == count)
             {
                 const char *caddr = gen_addr(dev, desc.idProduct);
-                mvLog(MVLOG_INFO,"caddr=%s\n",caddr);
-                mvLog(MVLOG_INFO, "Device %d Address: %s - VID/PID %04x:%04x\n", idx, caddr, desc.idVendor, desc.idProduct);
-                //if (usb_loglevel > 1)
-                //    fprintf(stderr, "Device %d Address: %s - VID/PID %04x:%04x\n", idx, caddr, desc.idVendor, desc.idProduct);
+                if (usb_loglevel > 1)
+                    fprintf(stderr, "Device %d Address: %s - VID/PID %04x:%04x\n", idx, caddr, desc.idVendor, desc.idProduct);
                 strncpy(addr, caddr, addrsize);
                 return USB_BOOT_SUCCESS;
             }

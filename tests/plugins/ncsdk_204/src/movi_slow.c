@@ -32,7 +32,7 @@ static TestRunnerProcess test_procs = {
 
 int main(int argc, char** argv)
 {
-  test_runner_create("./async_mode_cfg.json",&test_procs);
+  test_runner_create("../config/movidius_async.json",&test_procs);
 
   test_runner_run();
 }

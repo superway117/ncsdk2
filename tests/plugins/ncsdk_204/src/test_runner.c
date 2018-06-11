@@ -369,11 +369,13 @@ void* readResultThread(void* thread_param) {
   int frames = 0;
   do
   {
+   
     //printf("deviceParam->process->result_pre = 0x%p\n",deviceParam->process->result_pre);
     if(deviceParam->process && deviceParam->process->result_pre)
     {
       deviceParam->process->result_pre(deviceParam);
     }
+ 
     #ifdef TEST_USE_ION
     if(deviceParam->ion == 1)
       rc = ncFifoReadIonElem(outputFifoHandle, outputShareFd, &outputDataLength,
@@ -388,7 +390,7 @@ void* readResultThread(void* thread_param) {
        
       assert(0);
     }
-
+ 
     #ifdef TEST_USE_ION
     if(deviceParam->ion == 1){
       
@@ -423,8 +425,9 @@ void* readResultThread(void* thread_param) {
             maxIndex = index;
         }
     }
+ 
     //printf("deviceParam->process->result_pre = 0x%p\n",deviceParam->process->result_pre);
-    printf("[idx %d] readThread return numResults=%d\n", deviceParam->dev_idx,numResults);
+    printf("\033[1;34m[idx %d] readThread got frame %d/%d return numResults=%d\n\033[0m", deviceParam->dev_idx,++frames,deviceParam->inference_times,numResults);
     printf("Index of top result is: %d\n", maxIndex);
     printf("Probability of top result is: %f\n", resultData[maxIndex]);
     //assert(resultData[maxIndex]>0.9);
@@ -447,7 +450,7 @@ void* readResultThread(void* thread_param) {
       printf("\033[1;34m[idx %d]timeTaken = %f\033[0m\n", deviceParam->dev_idx, timeTaken[timeTakenLen/sizeof(float)-1]);
 
     }
-
+    
     int throttling;
     unsigned int throttlingLength = sizeof(int);
     rc = ncDeviceGetOption(deviceParam->device_handle, NC_RO_DEVICE_THERMAL_THROTTLING_LEVEL,
@@ -475,14 +478,15 @@ void* readResultThread(void* thread_param) {
 
 
     } 
-
+ 
 
     if(deviceParam->process && deviceParam->process->result_post)
     {
       deviceParam->process->result_post(deviceParam);
     }
-
-  }while(++frames<deviceParam->inference_times);
+ 
+    
+  }while(frames<deviceParam->inference_times && is_read_thread==1);
   printf("readResultThread exit\n");
   #ifdef TEST_USE_ION
   if(deviceParam->ion == 1){
@@ -567,22 +571,24 @@ void mvnc_runinference(TESTDEVICE_HANDLER* deviceParam) {
   unsigned int binLength = 0;
   #ifdef TEST_USE_ION
   int shareFd;
-  
+ 
   if(deviceParam->ion==1)
     load_test_bin_ion(deviceParam->tensor, &binLength, &shareFd);
   else
   #endif
   {
-    if(is_raw == 0){
+    if(is_raw == 0)
+    {
       imageBuf= (char*)LoadImage(deviceParam->tensor, networkDim, mean);
-      binLength = 3* networkDim* networkDim * sizeof(float);
+      binLength = 3*networkDim*networkDim*sizeof(float);
     }
     else
     {
-       
+      
       load_test_bin(deviceParam->tensor, &binLength, &imageBuf);
     }
   }
+  printf("binLength %d\n",binLength);
  
   //unsigned int lenBuf = 3*networkDim*networkDim*sizeof(*imageBuf);
   int i = 0;
@@ -601,14 +607,14 @@ void mvnc_runinference(TESTDEVICE_HANDLER* deviceParam) {
     {
       s_read_param[deviceParam->dev_idx][i].deviceParam = deviceParam;
       s_read_param[deviceParam->dev_idx][i].graph_index = i;
+      s_read_param[deviceParam->dev_idx][i].is_read_thread = 1;
       pthread_create(&readThread[i], 0, readResultThread, &s_read_param[deviceParam->dev_idx][i]);
     }
     
   }
   
 
-  printf("binLength = %d\n",binLength);
-  
+  printf("binLength %d\n",binLength);
   for (i=0; i < deviceParam->inference_times; i++)
   {
     printf("\033[1;32m[idx %d]Sending the %dth frame to device\033[0m\n", deviceParam->dev_idx, i);
@@ -655,12 +661,13 @@ void mvnc_runinference(TESTDEVICE_HANDLER* deviceParam) {
       {
         s_read_param[deviceParam->dev_idx][j].deviceParam = deviceParam;
         s_read_param[deviceParam->dev_idx][j].graph_index =j;
+        s_read_param[deviceParam->dev_idx][j].is_read_thread = 0;
         readResultThread(&s_read_param[deviceParam->dev_idx][j]);
       }
     }
   }
-  //deviceParam->writeThreadIsRun =0;
- 
+  deviceParam->writeThreadIsRun =0;
+  printf("mvnc_runinference  is fininshed 0\n");
   free(imageBuf);
   void* retval[MAX_GRAPH_NUM];
   if(sync_mode==0)
@@ -725,29 +732,28 @@ void* runner_thread_main(void* gDeviceParamList_i) {
 
     if(deviceParam->inference_times>0)
       mvnc_runinference(deviceParam);
- 
+
     ret = mvnc_input_fifo_delete(deviceParam);
     if (ret) {
       printf("test[%d]Delete fifo_in failed\n", testTime);
       return 0;
     }
- 
+
     ret = mvnc_output_fifo_delete(deviceParam);
     if (ret) {
       printf("test[%d]Delete fifo_out failed\n", testTime);
       return 0;
     }
- 
     mvnc_dealloc_graph(deviceParam);
- 
+
   }
   
-  printf("\033[41;36m runner_thread_main %d before  end...... \033[0m\n",
-         deviceParam->dev_idx);
+
   mvnc_device_close(deviceParam);
 
-
-  //gDeviceParamList[deviceParam->index].dev_idx = -1;
+  printf("\033[41;36m runner_thread_main %d end...... \033[0m\n",
+         deviceParam->dev_idx);
+  gDeviceParamList[deviceParam->index].dev_idx = -1;
   gDeviceParamList[deviceParam->index].device_handle = NULL;
 
   
