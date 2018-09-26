@@ -407,7 +407,7 @@ int main(int argc, char **argv)
     }
     if(graphfile)
     {
-        if(!loadcategories(categories_path))
+        if(categories_path != NULL && !loadcategories(categories_path))
         {
             unsigned int mem, memMax;
 
@@ -505,6 +505,9 @@ int main(int argc, char **argv)
             for(i = 0; i < ncategories; i++)
                 free(categories[i]);
             free(categories);
+        }
+        else {
+            fprintf(stderr, "Categories file hasn't been provided with graph, closing device...\n");
         }
         
         free(graphfile);

@@ -47,10 +47,10 @@
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="Documentation for the Intel® Movidius™ Neural Compute SDK and Intel® Movidius™ Neural Compute API." />
 <meta property="og:description" content="Documentation for the Intel® Movidius™ Neural Compute SDK and Intel® Movidius™ Neural Compute API." />
-<link rel="canonical" href="https://github.intel.com/pages/MIG-Internal/ncsdk_staging_internal/ncapi/ncapi2/py_api/GraphOption.html" />
-<meta property="og:url" content="https://github.intel.com/pages/MIG-Internal/ncsdk_staging_internal/ncapi/ncapi2/py_api/GraphOption.html" />
+<link rel="canonical" href="https://github.intel.com/pages/MIG-Internal/ncs2beta_ncsdk/ncapi/ncapi2/py_api/GraphOption.html" />
+<meta property="og:url" content="https://github.intel.com/pages/MIG-Internal/ncs2beta_ncsdk/ncapi/ncapi2/py_api/GraphOption.html" />
 <script type="application/ld+json">
-{"description":"Documentation for the Intel® Movidius™ Neural Compute SDK and Intel® Movidius™ Neural Compute API.","@type":"WebPage","url":"https://github.intel.com/pages/MIG-Internal/ncsdk_staging_internal/ncapi/ncapi2/py_api/GraphOption.html","headline":"GraphOption enum [Python NCAPI v2]","@context":"http://schema.org"}</script>
+{"description":"Documentation for the Intel® Movidius™ Neural Compute SDK and Intel® Movidius™ Neural Compute API.","@type":"WebPage","url":"https://github.intel.com/pages/MIG-Internal/ncs2beta_ncsdk/ncapi/ncapi2/py_api/GraphOption.html","headline":"GraphOption enum [Python NCAPI v2]","@context":"http://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 
     <script>
@@ -162,7 +162,7 @@
                                 searchInput: document.getElementById('search-input'),
                                 resultsContainer: document.getElementById('results-container'),
                                 dataSource: '../../../search.json',
-                                searchResultTemplate: '<li><a href="https://github.intel.com/pages/MIG-Internal/ncsdk_staging_internal{url}" title="">{display}</a></li>',
+                                searchResultTemplate: '<li><a href="https://github.intel.com/pages/MIG-Internal/ncs2beta_ncsdk{url}" title="">{display}</a></li>',
                     noResultsText: '',
                             limit: 10,
                             fuzzy: true,
@@ -604,13 +604,13 @@
       <td>The number of outputs expected by the graph.  This is the length of the RO_OUTPUT_TENSOR_DESCRIPTORS list.<br /><br /><em>Only 1 currently supported.</em></td>
     </tr>
     <tr>
-      <td>RO_INPUT_TENSOR_DESCRIPTORS</td>
+      <td>RO_INPUT_TENSOR_<br />DESCRIPTORS</td>
       <td>list(<a href="TensorDescriptor.html">TensorDescriptor</a>)</td>
       <td>N/A</td>
       <td>A list of <a href="TensorDescriptor.html">TensorDescriptor</a> objects that describe the graph inputs.</td>
     </tr>
     <tr>
-      <td>RO_OUTPUT_TENSOR_DESCRIPTORS</td>
+      <td>RO_OUTPUT_TENSOR_<br />DESCRIPTORS</td>
       <td>list(<a href="TensorDescriptor.html">TensorDescriptor</a>)</td>
       <td>N/A</td>
       <td>A list of <a href="TensorDescriptor.html">TensorDescriptor</a> objects that describe the graph outputs.</td>
@@ -649,7 +649,7 @@
       <td>RW_EXECUTORS_NUM</td>
       <td>int</td>
       <td>Positive int up to <a href="DeviceOption.html">RO_MAX_EXECUTORS_NUM</a></td>
-      <td>The number of Neural Compute Engines to use for graph execution if this graph is compiled as a <a href="../../../hardware_networks.html">hardware network</a>.</td>
+      <td><em>Reserved for future use.</em></td>
     </tr>
   </tbody>
 </table>

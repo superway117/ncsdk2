@@ -47,10 +47,10 @@
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="Documentation for the Intel® Movidius™ Neural Compute SDK and Intel® Movidius™ Neural Compute API." />
 <meta property="og:description" content="Documentation for the Intel® Movidius™ Neural Compute SDK and Intel® Movidius™ Neural Compute API." />
-<link rel="canonical" href="https://github.intel.com/pages/MIG-Internal/ncsdk_staging_internal/release_notes.html" />
-<meta property="og:url" content="https://github.intel.com/pages/MIG-Internal/ncsdk_staging_internal/release_notes.html" />
+<link rel="canonical" href="https://github.intel.com/pages/MIG-Internal/ncs2beta_ncsdk/release_notes.html" />
+<meta property="og:url" content="https://github.intel.com/pages/MIG-Internal/ncs2beta_ncsdk/release_notes.html" />
 <script type="application/ld+json">
-{"description":"Documentation for the Intel® Movidius™ Neural Compute SDK and Intel® Movidius™ Neural Compute API.","@type":"WebPage","url":"https://github.intel.com/pages/MIG-Internal/ncsdk_staging_internal/release_notes.html","headline":"Release Notes","@context":"http://schema.org"}</script>
+{"description":"Documentation for the Intel® Movidius™ Neural Compute SDK and Intel® Movidius™ Neural Compute API.","@type":"WebPage","url":"https://github.intel.com/pages/MIG-Internal/ncs2beta_ncsdk/release_notes.html","headline":"Release Notes","@context":"http://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 
     <script>
@@ -162,7 +162,7 @@
                                 searchInput: document.getElementById('search-input'),
                                 resultsContainer: document.getElementById('results-container'),
                                 dataSource: 'search.json',
-                                searchResultTemplate: '<li><a href="https://github.intel.com/pages/MIG-Internal/ncsdk_staging_internal{url}" title="">{display}</a></li>',
+                                searchResultTemplate: '<li><a href="https://github.intel.com/pages/MIG-Internal/ncs2beta_ncsdk{url}" title="">{display}</a></li>',
                     noResultsText: '',
                             limit: 10,
                             fuzzy: true,
@@ -247,12 +247,6 @@
                     
                     
                     <li><a href="vm_config.html">Virtual Machine</a></li>
-                    
-                    
-                    
-                    
-                    
-                    <li><a href="windows.html">Windows (NCAPI-only)</a></li>
                     
                     
                     
@@ -509,52 +503,43 @@
         <div class="col-md-9" id="tg-sb-content">
             <p>============================================================</p>
 <h1 id="movidius-neural-compute-sdk-release-notes">Movidius Neural Compute SDK Release Notes</h1>
-<h1 id="v20500-2018-06-07">V2.05.00 2018-06-07</h1>
+<h1 id="v20800i-2018-09-17">V2.08.00i 2018-09-17</h1>
 <p>============================================================</p>
 
-<h2 id="important-notes">Important Notes</h2>
-
-<p>Note 1: This version of SDK is compatible with Myriad 2 and Myriad X based devices.</p>
-
-<p>Note 2: This SDK is pre-release quality. As a result, you may encounter any number of feature limitations or quality issues, including limited documentation or regressions from previous SDKs.</p>
-
-<p>Note 3: For this release, please use NCS2 MyriadX based device with a USB3 slot or a powered USB2 hub.</p>
-
-<p>Note 4: For this release, OEM users that build custom firmware need to apply a MDK patch.  Please contact Movidius support for guidance.</p>
+<p>As of V2.05.00, SDK has been refactored and contains many new features and structural changes. It is recommended you read the documentation to familiarize with the new features and contents.</p>
 
 <h2 id="sdk-notes">SDK Notes:</h2>
+
 <h3 id="new-features">New features:</h3>
 <ol>
-  <li>Software or Hardware processing.  The Myriad X supports the option of executing networks on shaves, referred to as software processing, or on the CNN engines, referred to as hardware processing.  Selection of hardware processing is done during compilation using the –ma2480 flag.  Myriad 2 does not support this feature.  If this flag is used, hardware compatible layers are run in hardware.  (See erratum 2)</li>
-  <li>In this release the Caffe network parser is being refactored to enable the compiler to do more complex graph optimizations.  Some of the networks can only be compiled using the –new-parser flag (see details below). For this release most HW enabled networks will run better using the –new-parser flag.  When compiling hardware networks using hand-optimized configurations, users need to associate the appropriate scheduler by using the –scheduler compiler flag.</li>
-  <li>For hardware capable layers this version of SDK supports automatic compilation. For select networks a hand optimized compilation method is also provided.</li>
-  <li>TensorFlow 1.7 is now supported.</li>
-  <li>Using the default parser for some HW networks will have a loss of accuracy due to the CNN engine accumulator.  The –adjust_accuracy flag to adjust per-layer accuracy can be used to compensate for accuracy loss (See erratum 16).</li>
-  <li>Automatic accuracy adjustment has been added when using the –new-parser flag.</li>
-  <li>The NCSDK API now supports automatic padding and conversion to input tensor format to support CNN engine formats.  Apps written for v2.04 or earlier that used HW specific padding should set the HOST_TENSOR_LAYOUT option in the API, or remove the padding/conversion.</li>
-  <li>Support for fully connected layers that input a 3D tensor.</li>
-  <li>Experimental Windows support for NCAPI only.  See documentation under “Other Installation Options” -&gt; “Windows (NCAPI-Only)” for details.</li>
+  <li>Tensorflow 1.09 supported.  Tensorflow 1.09 is automatically installed on Ubuntu.</li>
+  <li>The compiler has been improved to automatically provide best performance, now for both Caffe and select networks on Tensorflow. The previous version of compiler is also included for Tensorflow networks.</li>
 </ol>
+
+<p>-When compiling Caffe networks, the new compiler is used automatically. 
+-When compiling Tensorflow netoworks, the old compiler is used automatically. To invoke the new compiler, include the –new-parser flag when compiling</p>
 
 <h4 id="networks">Networks:</h4>
 <ol>
-  <li>AlexNet, Inception V1, and SSD-Mobilenet are supported on CNN engines using the –ma2480 and –new-parser flags discussed above.</li>
+  <li>Tensorflow –new-parser flag now adds support for Mobilenet v1 variants, VGG-16 and all Inception networks, and Inception_resnet_v2</li>
 </ol>
 
 <h4 id="layers">Layers:</h4>
+<ol>
+  <li>No change.</li>
+</ol>
 
 <h2 id="api-notes">API Notes:</h2>
 <ol>
-  <li>API had some refactoring done since last release, please see documentation for the updated API.</li>
+  <li>Apps written with NCAPI v1 are not compatible with this release and need to be migrated to NCAPI v2, refer to <a href="ncapi/readme.html">Migrating Applications from NCAPI v1 to NCAPI v2</a> for information about migrating apps to the new API.</li>
 </ol>
 
 <h2 id="network-notes">Network Notes:</h2>
-<p>Support for the following networks has been tested up to 12 shaves.</p>
+<p>Support for the following networks has been tested.</p>
 
 <h3 id="caffe">Caffe</h3>
 <ol>
   <li>GoogleNet V1</li>
-  <li>GoogleNet BatchNorm</li>
   <li>SqueezeNet V1.1</li>
   <li>LeNet</li>
   <li>CaffeNet</li>
@@ -564,17 +549,18 @@
   <li>VGG 16 (Configuration D)</li>
   <li>Resnet 18</li>
   <li>Resnet 50</li>
+  <li>Mobilenet v1</li>
   <li>SSD Mobilenet v1</li>
 </ol>
 
-<h3 id="tensorflow-r17">Tensorflow r1.7</h3>
+<h3 id="tensorflow-r109">Tensorflow r1.09</h3>
 <ol>
   <li>inception-v1</li>
   <li>inception-v2</li>
   <li>inception-v3</li>
   <li>inception-v4</li>
+  <li>Inception ResNet v2</li>
   <li>VGG 16 (Configuration D)</li>
-  <li>Yolo-Tiny v2</li>
   <li>Mobilenet_V1_1.0 variants:
     <ul>
       <li>MobileNet_v1_1.0_224</li>
@@ -595,97 +581,69 @@
       <li>MobileNet_v1_0.25_128</li>
     </ul>
   </li>
+  <li>TinyYolo v2 via Darkflow tranformation</li>
+  <li>facenet based on inception-resnet-v1</li>
 </ol>
 
-<h3 id="cnn-networks">CNN Networks</h3>
-<ol>
-  <li>Googlenet V1 without LRN (see GoogLeNetMx example)</li>
-  <li>Googlenet BatchNorm</li>
-  <li>Googlenet Original</li>
-  <li>VGG-16 (Configuration D)</li>
-  <li>Yolo-Tiny 3-class with modified prototxt</li>
-  <li>Yolo-Tiny v1</li>
-  <li>Mobilenet 224</li>
-  <li>Resnet-18 (requires –new-parser, see erratums #17)</li>
-  <li>Resnet-50 (requires –new-parser, performance only see erratums #17)</li>
-  <li>SSD Mobilenet (requires –new-parser, performance only see erratums #17)</li>
-  <li>SSD GoogleNet</li>
-  <li>Squeezenet</li>
-  <li>Alexnet (requires –new-parser, performance only see erratums #17, 18)</li>
-  <li>Inception V1 (requires –new-parser, see eratta #20)</li>
-</ol>
-
-<h2 id="firmware-features-on-shaves">Firmware Features on Shaves:</h2>
+<h2 id="firmware-features">Firmware Features:</h2>
 <ol>
   <li>Convolutions
     <ul>
-      <li>NxN Convolution with Stride S.</li>
-      <li>The following cases have been extensively tested: 1x1s1,3x3s1,5x5s1,7x7s1, 7x7s2, 7x7s4</li>
+      <li>The following convolution cases have been extensively tested (for stride s): 1x1s1, 3x3s1, 5x5s1, 7x7s1, 7x7s2, 7x7s4, 1x3, 3x1, 1x7, 7x1</li>
       <li>Group convolution</li>
       <li>Depth Convolution</li>
       <li>Dilated convolution</li>
     </ul>
   </li>
-  <li>Max Pooling Radix NxM with Stride S (See erratum #5)</li>
-  <li>Average Pooling: Radix NxM with Stride S, Global average pooling (See erratum #5)</li>
+  <li>Max Pooling Radix NxM with Stride S</li>
+  <li>Average Pooling: Radix NxM with Stride S, Global average pooling</li>
   <li>Local Response Normalization</li>
-  <li>Relu, Relu-X, Prelu, and Leaky-Relu (see erratum #8)</li>
+  <li>Relu, Relu-X, Prelu (see erattum #10)</li>
   <li>Softmax</li>
   <li>Sigmoid</li>
-  <li>Tanh (see erratum #8)</li>
+  <li>Tanh (see erratum #10)</li>
   <li>Deconvolution</li>
   <li>Slice</li>
   <li>Scale</li>
   <li>ElmWise unit : supported operations - sum, prod, max</li>
-  <li>Fully Connected Layers (limited support – see erratum #10)</li>
+  <li>Fully Connected Layers (limited support – see erratum #8)</li>
   <li>Reshape</li>
   <li>Flatten</li>
   <li>Power</li>
   <li>Crop</li>
   <li>ELU</li>
-  <li>Batch Normalization (Fused)</li>
+  <li>Batch Normalization</li>
   <li>L2 Normalization</li>
   <li>Input Layer</li>
 </ol>
 
-<h2 id="firmware-features-on-cnn-engines">Firmware Features on CNN Engines:</h2>
-<ol>
-  <li>Convolution</li>
-  <li>Max Pooling Radix NxM with Stride S (See erratum #5)</li>
-  <li>Average Pooling: Radix NxM with Stride S, Global average pooling (See erratum #6)</li>
-  <li>Fully Connected Layers</li>
-  <li>Scale (Post operation only)</li>
-  <li>Relu, Relu-X, Prelu, Leaky-Relu</li>
-  <li>Fused Non-overlapping pooling</li>
-</ol>
-
 <h2 id="bug-fixes">Bug Fixes:</h2>
+<ol>
+  <li>Fixed: Profiler creates no output for –new-parser networks.</li>
+</ol>
 
 <h2 id="errata">Errata:</h2>
 <ol>
-  <li>Only Ubuntu 16.04 LTS is supported as a host OS for this release.  Raspberry Pi has not been validated.</li>
-  <li>The SDK includes a GoogLeNet where LRN has been removed and hardware compilation has been set by default, which is found in examples/caffe/GoogLeNetMx.  This version has weights that have been retrained on a limited data set.  As such, please use the GoogLeNetMx directory only for performance evaluation.</li>
+  <li>Python 2.7 is fully supported for making user applications, but only the helloworld_py example runs as-is in both python 2.7 and 3.5 due to dependencies on modules.</li>
   <li>Depth-wise convolution may not be supported if channel multiplier &gt; 1.</li>
   <li>If working behind proxy, proper proxy settings must be applied for the installer to succeed.</li>
-  <li>Non-Overlapping Pooling can run as post operation on HW and as a separate operation in SW. Overlapping pooling is supported as a separate operation on both HW and SW.</li>
-  <li>Convolution on shaves may fail to find a solution for very large inputs.</li>
-  <li>Depth convolution is tested for 3x3 kernels.</li>
+  <li>Although improved, the installer is known to take a long time on Raspberry Pi. Date/time must be correct for SDK installation to succeed on Raspberry Pi.</li>
+  <li>This version not tested on Myriad 2-based devices such as Neural Compute Stick 1.</li>
+  <li>Inception V1 obtained values are invalid for mvNCCheck unless –new-parser flag is used.</li>
+  <li>Convolution may fail to find a solution for very large inputs.</li>
+  <li>Depth-wise convolution is tested for 3x3 kernels.</li>
   <li>A TanH layer’s “top” &amp; “bottom” blobs must have different names.  This is different from a ReLU layer, whose “top” &amp; “bottom” should be named the same as its previous layer.</li>
-  <li>Although mvNCCheck shows per-pixel error for some metrics for mobilenet_v1_224 and hardware GoogLeNet, classification results are not impacted.</li>
-  <li>FC with input NxNxD where N is higher than 1 are not supported natively on CNN Engines.  Therefore, they run as a convolution which requires modification of prototxt for this release.  Please contact Movidius support for guidance and a helper script.</li>
-  <li>If the last layer is a reshape it will be optimized out of the network so it will not be reported in the mvNCProfile output.</li>
-  <li>Simultaneous evaluation of hardware networks is supported in the api which allows an application to double the performance of a particular hardware network.  When running hardware processing with two threads the networks must be compiled with 4 shaves or fewer.</li>
-  <li>A Caffe Scale layer only supports 1 input tensor.</li>
-  <li>The old Caffe prototxt format is not supported with the new parser. Installation with the nc toolkit will install the correct version.  Caffe installations have an upgrade tool “upgrade_net_prototext”. Users who have installed manually may experience issues.</li>
-  <li>NcProfile will not produce a visual report in this release for generalized parser.</li>
-  <li>The –accuracy_adjust=VALUES flag should be used if accuracy for HW networks is low when the network is compiled with the default parser.  A setting of –accuracy_adjust=”ALL:256” has been found to improve the accuracy for most networks.</li>
-  <li>Resnet-18, Resnet-50, Inception V1, AlexNet, and SSD-Mobilenet require the –new-parser flag.</li>
-  <li>For this release if running Alexnet using 2 threads the graph should be compiled with 2 shaves.</li>
-  <li>Compiling and running a graph with 5 and 15 shaves is not supported.</li>
-  <li>Tensorflow differs from Caffe in the way padding is done for the tensors. NCE follows the Caffe style and thus would generate
-different results layer on layer, however this has almost no impact on the full network accuracy and clasification. The impact of
-this is layer level comparison would fail using mvNCCheck.py.</li>
+  <li>On upgrade from previous versions of SDK, the installer will detect if openCV 3.3.0 was installed, for example from http://github.com/movidius/ncappzoo/apps/stream_ty_gn/install-opencv-from_source.sh.  For this release, the installer will prompt to uninstall this specific version of openCV. This is required for ssd-caffe to run correctly.  After 2.05 installation is complete, openCV 3.3.0 can be re-installed and the ssd-caffe will continue to function.</li>
+  <li>The MTCNN network in the app zoo is showing unexpected behavior for this release, and is being investigated.  To use MTCNN, please use version 1.12.00 of SDK.</li>
+  <li>Although mvNCCheck shows per-pixel error for some metrics for mobilenet_v1_224, classification results are not impacted.</li>
+  <li>Only Ubuntu 16.04 LTS is supported as a host OS for this release.  Ubuntu 18.04 is being evaluated.</li>
+  <li>Group Deconvolution with “group” parameter != 1 is not supported on the new parser.</li>
+  <li>For this release, some variants of Tensorflow mobilenet v1 networks with “–new-parser” flag show performance test result degrade up to 18% from original parser mode.</li>
+  <li>For this release, use of Myriad devices connected to some specific hubs can fail.  If you encounter errors, please try direct connect to PC port, or try a different hub.</li>
+  <li>Layer optimization for layers that run on HW are seen in the profiler graph. Profiler graph, if using new parser, shows multiple connections to and out of depth wise convolutions and some other implicit layers. Note that the different groups of depthwise convolutions  (optimized for HW) don’t show up explicitly in the profiler graph.</li>
+  <li>Loading multiple graphs into one Myriad-X device may show stability issues with this release.</li>
 </ol>
+
 
         </div>
     <!-- /.row -->

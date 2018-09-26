@@ -15,7 +15,6 @@
 * Any license under such intellectual property rights must be express and
 * approved by Intel in writing.
 */
-
 ///
 /// @file
 ///
@@ -29,7 +28,7 @@ extern "C"
 {
 #endif
 
-#define USB_LINK_MAX_STREAMS 32
+#define XLINK_MAX_STREAMS 8
 #define USB_LINK_MAX_PACKETS_PER_STREAM 64
 
 typedef enum{
@@ -42,6 +41,14 @@ typedef enum{
     X_LINK_TIMEOUT,
     X_LINK_ERROR
 } XLinkError_t;
+
+typedef enum{
+    USB_VSC = 0,
+    USB_CDC,
+    PCIE,
+    IPC,
+    NMB_OF_PROTOCOLS
+} XLinkProtocol_t;
 
 #define USB_LINK_INVALID_FD  (-314)
 
@@ -73,6 +80,7 @@ typedef struct XLinkGlobalHandler_t
 {
     int loglevel;
     int profEnable;
+    int protocol;
     XLinkProf_t profilingData;
 } XLinkGlobalHandler_t;
 

@@ -18,7 +18,6 @@
 
 // USB utility for use with Myriad2v2 ROM
 // Very heavily modified from Sabre version of usb_boot
-// Author: David Steinberg <david.steinberg@movidius.com>
 // Copyright(C) 2015 Movidius Ltd.
 
 
@@ -39,7 +38,6 @@
 #include <libusb.h>
 #endif
 #include "usb_boot.h"
-#include "mvLog.h"
 
 
 
@@ -211,13 +209,18 @@ usbBootError_t usb_find_device(unsigned idx, char *addr, unsigned addrsize, void
     // 2 => pid
     // '255-' x 7 (also gives us nul-terminator for last entry)
     // 7 => to add "-maXXXX"
-    uint8_t devs[15][2 + 2 + 4 * 7 + 7] = { 0 };//to store ven_id,dev_id;
+    //uint8_t devs[15][2 + 2 + 4 * 7 + 7] = { 0 };//to store ven_id,dev_id;
+    static uint8_t devs[15][2 + 2 + 4 * 7 + 7] = { 0 };//to store ven_id,dev_id;
+    static int devs_cnt = 0;
 #else
     static libusb_device **devs;
     libusb_device *dev;
     struct libusb_device_descriptor desc;
 #endif
     int count = 0;
+#if (defined(_WIN32) || defined(_WIN64))
+    int create_count = 0;
+#endif
     size_t i;
 
     if(!initialized)
@@ -235,7 +238,10 @@ usbBootError_t usb_find_device(unsigned idx, char *addr, unsigned addrsize, void
                 fprintf(stderr, "Unable to get USB device list: %s\n", libusb_strerror(res));
             return USB_BOOT_ERROR;
         }
+        devs_cnt = res;
     }
+    else
+        res = devs_cnt;
 #else
     if(!devs || idx == 0)
     {
@@ -257,14 +263,14 @@ usbBootError_t usb_find_device(unsigned idx, char *addr, unsigned addrsize, void
     while (res-- > 0)
     {
         if (((int)(devs[res][0] << 8 | devs[res][1]) == vid && (devs[res][2] << 8 | devs[res][3]) == pid) ||
-            (pid == 0 && vid == 0 &&
+            ((pid == 0 || pid == -1) && vid == 0 &&
             (((int)(devs[res][0] << 8 | devs[res][1]) == DEFAULT_VID && is_pid_supported((int)(devs[res][2] << 8 | devs[res][3])) == 1) ||
             ((int)(devs[res][0] << 8 | devs[res][1]) == DEFAULT_OPENVID && (int)(devs[res][2] << 8 | devs[res][3]) == DEFAULT_OPENPID))))
         {
             if (device)
             {
                 const char *caddr = &devs[res][4];
-                if (strstr(caddr, addr))
+                if (!strcmp(caddr, addr))
                 {
                     if (usb_loglevel > 1)
                         fprintf(stderr, "Found Address: %s - VID/PID %04x:%04x\n", addr, (int)(devs[res][0] << 8 | devs[res][1]), (int)(devs[res][2] << 8 | devs[res][3]));
@@ -272,7 +278,20 @@ usbBootError_t usb_find_device(unsigned idx, char *addr, unsigned addrsize, void
                     return USB_BOOT_SUCCESS;
                 }
             }
-            else if (idx == count)
+            else if ((pid == -1) && (int)(devs[res][2] << 8 | devs[res][3]) != DEFAULT_OPENPID)//pid==-1 is an indicator to try to find Myriad devices, exclude VSC devices
+            {
+                if (idx == create_count)
+                {
+                    const char *caddr = &devs[res][4];
+                    if (usb_loglevel > 1)
+                        fprintf(stderr, "Device %d Address: %s - VID/PID %04x:%04x\n", idx, caddr, (int)(devs[res][0] << 8 | devs[res][1]), (int)(devs[res][2] << 8 | devs[res][3]));
+                    strncpy(addr, caddr, addrsize);
+                    return USB_BOOT_SUCCESS;
+                }
+                else
+                    create_count++;
+            }
+            else if ((idx == count) && (pid != -1))
             {
                 const char *caddr = &devs[res][4];
                 if (usb_loglevel > 1)

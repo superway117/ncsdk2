@@ -293,11 +293,12 @@ static void initialize()
         initialize_loglevel();
 
     initialized = 1;
+    ghandler.protocol = 0;
     int sc = XLinkInitialize(&ghandler);    //need to be called once
     if (sc != X_LINK_SUCCESS) {
         mvLog(MVLOG_ERROR, "Initialization failed\n");
     }
-#ifndef XLINK_NO_BOOT
+#ifndef XLINK_NO_RESET
     resetAll();
 #endif
 }
@@ -320,7 +321,16 @@ ncStatus_t ncDeviceCreate(int index, struct ncDeviceHandle_t **deviceHandle)
     if (!initialized)
         initialize();
 
-    XLinkError_t rc = XLinkGetUnbootDeviceName(index, name, NC_MAX_NAME_SIZE);
+#if (defined(_WIN32) || defined(_WIN64))
+    index -= deviceGetNumberOfDevices();
+    if (index < 0) {
+        mvLog(MVLOG_ERROR, "Invalid create index");
+        return NC_INVALID_PARAMETERS;
+    }
+    XLinkError_t rc = XLinkGetDeviceNameExtended(index, name, NC_MAX_NAME_SIZE, -1); //pid== -1 is an indicator to let lower usb layer know how to exclude vsc devices
+#else
+    XLinkError_t rc = XLinkGetDeviceName(index, name, NC_MAX_NAME_SIZE);
+#endif
     pthread_mutex_unlock(&globalMutex);
 
     if (rc == X_LINK_SUCCESS) {
@@ -445,6 +455,19 @@ static ncStatus_t deviceGetDeviceMemory(struct _devicePrivate_t *d,
     return NC_OK;
 }
 
+static int deviceGetNumberOfDevices()
+{
+    int num = 0;
+
+    struct _devicePrivate_t *d = devices;
+    while (d) {
+        num++;
+        d = d->next;
+    }
+    return num;
+}
+
+
 static int isDeviceOpened(const char *name)
 {
     struct _devicePrivate_t *d = devices;
@@ -506,6 +529,10 @@ ncStatus_t ncDeviceOpen(struct ncDeviceHandle_t * deviceHandle)
     else
         mvLog(MVLOG_INFO, "%s() XLinkBootRemote returned success %d\n", __func__, rc);
 
+#if (defined(_WIN32) || defined(_WIN64) )
+	usleep(2000000);
+#endif
+
     double waittm = timeInSeconds() + STATUS_WAIT_TIMEOUT;
     while (timeInSeconds() < waittm && rc == 0) {
         XLinkHandler_t *handler = calloc(1, sizeof(XLinkHandler_t));
@@ -517,25 +544,19 @@ ncStatus_t ncDeviceOpen(struct ncDeviceHandle_t * deviceHandle)
             int count = 0;
             while (1) {
                 name2[0] = '\0';
-                sleep(1);
-                rc = XLinkGetBootDeviceName(count, name2, NC_MAX_NAME_SIZE);
-                mvLog(MVLOG_INFO, "[%s:%d] name2 = %s\n", __func__,__LINE__, name2);
-
+                rc = XLinkGetDeviceName(count, name2, NC_MAX_NAME_SIZE);
                 if (rc != X_LINK_SUCCESS)
                     break;
-                if (isDeviceOpened(name2)==0) {
-                    mvLog(MVLOG_INFO, "[%s:%d] opened\n", __func__,__LINE__);
-
+                if (isDeviceOpened(name2) == 0)
+                {
+                    count++;
                     continue;
                 }
                 handler->devicePath = (char *) name2;
                 rc = XLinkConnect(handler);
-                sleep(1);
                 if (isDeviceOpened(name2) < 0 && rc == X_LINK_SUCCESS) {
-                    mvLog(MVLOG_INFO, "[%s:%d] opened\n", __func__,__LINE__);
                     break;
                 }
-                
                 count++;
             }
         }
@@ -562,7 +583,7 @@ ncStatus_t ncDeviceOpen(struct ncDeviceHandle_t * deviceHandle)
         mvLog(MVLOG_INFO, "Booted %s -> %s\n",
               d->dev_addr, d->dev_file ? d->dev_file : "VSC");
         pthread_mutex_unlock(&globalMutex);
-        sleep(1);   //Allow device to initialize the XLink
+        usleep(1000000);   //Allow device to initialize the XLink
         streamId_t streamId = XLinkOpenStream(d->usb_link->linkId, "deviceMonitor",
                                                 CONFIG_STREAM_SIZE);
         if (streamId == INVALID_STREAM_ID) {
@@ -570,8 +591,10 @@ ncStatus_t ncDeviceOpen(struct ncDeviceHandle_t * deviceHandle)
             return NC_ERROR;
         }
         d->device_mon_stream_id = streamId;
-        getDevAttributes(d);
-
+        if (getDevAttributes(d)){
+            mvLog(MVLOG_WARN, "getDevAttributes failed!\n");
+            return NC_ERROR;
+        }
 
         streamId = XLinkOpenStream(d->usb_link->linkId, "graphMonitor",
                                     BLOB_STREAM_SIZE);
@@ -796,9 +819,12 @@ ncStatus_t ncDeviceClose(struct ncDeviceHandle_t * deviceHandle)
         XLinkCloseStream(d->graph_monitor_stream_id);
     d->device_mon_stream_id = INVALID_LINK_ID;
     d->graph_monitor_stream_id = INVALID_LINK_ID;
-
+#ifndef XLINK_NO_RESET
     // Reset
     XLinkResetRemote(d->usb_link->linkId);
+#else
+    XLinkDisconnect(d->usb_link->linkId);
+#endif
 
 //  usblink_resetmyriad(d->usb_link);
 //  usblink_close(d->usb_link);
@@ -943,13 +969,9 @@ ncStatus_t ncGraphAllocate(struct ncDeviceHandle_t * deviceHandle,
     static int graphIdCount = 0;
     struct _graphPrivate_t *g = graphHandle->private_data;
 
-    struct _devicePrivate_t *d = devices;
-    if (graphBufferLength > d->dev_attr.max_memory) {
-        mvLog(MVLOG_ERROR, "The graph file is bigger than the device memory");
-        return NC_OUT_OF_MEMORY;
-    }
-
     pthread_mutex_lock(&globalMutex);
+
+    struct _devicePrivate_t *d = devices;
     while (d) {
         if (d == deviceHandle->private_data)
             break;
@@ -962,6 +984,11 @@ ncStatus_t ncGraphAllocate(struct ncDeviceHandle_t * deviceHandle,
         return NC_INVALID_PARAMETERS;
     }
     pthread_mutex_unlock(&globalMutex);
+
+    if (graphBufferLength > d->dev_attr.max_memory) {
+        mvLog(MVLOG_ERROR, "The graph file is bigger than the device memory");
+        return NC_OUT_OF_MEMORY;
+    }
 
     g->id = graphIdCount++;
     streamId_t streamId;
@@ -2323,6 +2350,7 @@ static unsigned int getTotalSize(struct ncTensorDescriptor_t* desc) {
 static unsigned int getElementSize(struct _fifoPrivate_t * handle) {
     return handle->host_tensor_desc.totalSize;
 }
+
 ncStatus_t ncFifoAllocate(struct ncFifoHandle_t * fifoHandle,
                           struct ncDeviceHandle_t * device,
                           struct ncTensorDescriptor_t * tensor_desc,
@@ -2534,6 +2562,7 @@ ncStatus_t ncFifoDestroy(struct ncFifoHandle_t ** fifoHandle)
 
 }
 
+
 ncStatus_t ncFifoWriteElem(struct ncFifoHandle_t * fifoHandle,
                            const void *inputTensor,
                            unsigned int * inputTensorLength,
@@ -2674,7 +2703,6 @@ ncStatus_t ncFifoReadElem(struct ncFifoHandle_t * fifoHandle, void *outputData,
         mvLog(MVLOG_ERROR, "API already read this element");
         return NC_UNAUTHORIZED;
     }
-
     streamPacketDesc_t *packet;
     if (!XLinkReadData(handle->streamId, &packet)) {
         // Convert fp16 to fp32 and/or layout
@@ -2703,6 +2731,10 @@ ncStatus_t ncFifoReadElem(struct ncFifoHandle_t * fifoHandle, void *outputData,
             memcpy(outputData, packet->data, packet->length);
         }
         XLinkReleaseData(handle->streamId);
+    }
+    else{
+        mvLog(MVLOG_ERROR, "Failed to read fifo element\n");
+        return NC_ERROR;
     }
 
     //As user should see an API read to be the same as Graph read, we need to wirte the element in 2 queues.

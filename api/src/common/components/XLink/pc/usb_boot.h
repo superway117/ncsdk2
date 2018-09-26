@@ -25,11 +25,8 @@ extern int usb_loglevel;
 
 #define DEFAULT_OPENVID             0x03E7
 #define DEFAULT_OPENPID             0xf63b      // Once opened in VSC mode, VID/PID change
-
-
 #define DEFAULT_UNBOOTPID_2485    0x2485
 #define DEFAULT_UNBOOTPID_2150    0x2150
-
 
 typedef enum usbBootError {
     USB_BOOT_SUCCESS = 0,

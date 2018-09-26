@@ -20,6 +20,7 @@
 /// @file
 /// @brief     Application configuration Leon header
 ///
+
 #ifndef _XLINK_H
 #define _XLINK_H
 #include "XLinkPublicDefines.h"
@@ -35,7 +36,6 @@ XLinkError_t XLinkInitialize(XLinkGlobalHandler_t* handler);
 // Connects to specific device, starts dispatcher and pings remote
 XLinkError_t XLinkConnect(XLinkHandler_t* handler);
 
-
 // Opens a stream in the remote that can be written to by the local
 // Allocates stream_write_size (aligned up to 64 bytes) for that stream
 streamId_t XLinkOpenStream(linkId_t id, const char* name, int stream_write_size);
@@ -48,8 +48,7 @@ XLinkError_t XLinkCloseStream(streamId_t streamId);
 XLinkError_t XLinkGetAvailableStreams(linkId_t id);
 
 XLinkError_t XLinkGetDeviceName(int index, char* name, int nameSize);
-XLinkError_t XLinkGetBootDeviceName(int index, char* name, int nameSize);
-XLinkError_t XLinkGetUnbootDeviceName(int index, char* name, int nameSize);
+XLinkError_t XLinkGetDeviceNameExtended(int index, char* name, int nameSize, int pid);
 
 // Send a package to initiate the writing of data to a remote stream
 // Note that the actual size of the written data is ALIGN_UP(size, 64)
@@ -74,6 +73,9 @@ XLinkError_t XLinkBootRemote(const char* deviceName, const char* binaryPath);
 
 // Reset the remote
 XLinkError_t XLinkResetRemote(linkId_t id);
+
+//Closes connection only
+XLinkError_t XLinkDisconnect(linkId_t id);
 
 // Close all and release all memory
 XLinkError_t XLinkResetAll();

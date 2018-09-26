@@ -15,7 +15,6 @@
 * Any license under such intellectual property rights must be express and
 * approved by Intel in writing.
 */
-
 ///
 /// @file
 ///
@@ -24,7 +23,7 @@
 #ifndef _XLINKPRIVATEDEFINES_H
 #define _XLINKPRIVATEDEFINES_H
 
-#ifdef _USBLINK_ENABLE_PRIVATE_INCLUDE_
+#ifdef _XLINK_ENABLE_PRIVATE_INCLUDE_
 
 #include <stdint.h>
 #if (defined(_WIN32) || defined(_WIN64))
@@ -32,8 +31,9 @@
 #else
 #include <semaphore.h>
 #endif
+
 #include <XLinkPublicDefines.h>
-#include "UsbLinkPlatform.h"
+#include "XLinkPlatform.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -41,11 +41,7 @@ extern "C"
 #endif
 #define MAX_NAME_LENGTH 16
 
-#ifdef USE_USB_VSC
 #define HEADER_SIZE (64-12 -8)
-#else
-#define HEADER_SIZE (64-12 -8)
-#endif
 
 #define MAXIMUM_SEMAPHORES 32
 #define __CACHE_LINE_SIZE 64
@@ -55,9 +51,9 @@ extern "C"
 typedef int32_t eventId_t;
 
 typedef enum {
-    USB_LINK_NOT_INIT,
-    USB_LINK_UP,
-    USB_LINK_DOWN,
+    XLINK_NOT_INIT,
+    XLINK_UP,
+    XLINK_DOWN,
 }xLinkState_t;
 
 typedef struct{
@@ -86,6 +82,7 @@ typedef struct{
 //events which are coming from remote
 typedef enum
 {
+    /*USB related events*/
     USB_WRITE_REQ,
     USB_READ_REQ,
     USB_READ_REL_REQ,
@@ -94,7 +91,6 @@ typedef enum
     USB_PING_REQ,
     USB_RESET_REQ,
     USB_REQUEST_LAST,
-
     //note that is important to separate request and response
     USB_WRITE_RESP,
     USB_READ_RESP,
@@ -104,8 +100,28 @@ typedef enum
     USB_PING_RESP,
     USB_RESET_RESP,
     USB_RESP_LAST,
-    /*Add PCI-E related events at tail*/
 
+    /*PCI-E related events*/
+    PCIE_WRITE_REQ,
+    PCIE_READ_REQ,
+    PCIE_CREATE_STREAM_REQ,
+    PCIE_CLOSE_STREAM_REQ,
+    //
+    PCIE_WRITE_RESP,
+    PCIE_READ_RESP,
+    PCIE_CREATE_STREAM_RESP,
+    PCIE_CLOSE_STREAM_RESP,
+
+    /*IPC related events*/
+    IPC_WRITE_REQ,
+    IPC_READ_REQ,
+    IPC_CREATE_STREAM_REQ,
+    IPC_CLOSE_STREAM_REQ,
+    //
+    IPC_WRITE_RESP,
+    IPC_READ_RESP,
+    IPC_CREATE_STREAM_RESP,
+    IPC_CLOSE_STREAM_RESP,
 } xLinkEventType_t;
 
 typedef enum
@@ -151,7 +167,7 @@ typedef struct xLinkEvent_t {
 }
 #endif
 
-#endif  /*_USBLINK_ENABLE_PRIVATE_INCLUDE_ end*/
+#endif  /*_XLINK_ENABLE_PRIVATE_INCLUDE_ end*/
 #endif
 
 /* end of include file */

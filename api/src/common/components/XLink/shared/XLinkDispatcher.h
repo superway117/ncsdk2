@@ -23,7 +23,7 @@
 ///
 #ifndef _XLINKDISPATCHER_H
 #define _XLINKDISPATCHER_H
-#define _USBLINK_ENABLE_PRIVATE_INCLUDE_
+#define _XLINK_ENABLE_PRIVATE_INCLUDE_
 #include "XLinkPrivateDefines.h"
 
 #ifdef __cplusplus
@@ -47,7 +47,7 @@ struct dispatcherControlFunctions {
                                 int (*eventReceive) (xLinkEvent_t*);
                                 getRespFunction localGetResponse;
                                 getRespFunction remoteGetResponse;
-                                void (*closeLink) (void* fd);
+                                void (*closeLink) (void* fd, int fullClose);
                                 void (*resetDevice) (void* fd);
                                 };
 

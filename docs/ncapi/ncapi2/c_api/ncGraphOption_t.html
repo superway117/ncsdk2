@@ -47,10 +47,10 @@
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="Documentation for the Intel® Movidius™ Neural Compute SDK and Intel® Movidius™ Neural Compute API." />
 <meta property="og:description" content="Documentation for the Intel® Movidius™ Neural Compute SDK and Intel® Movidius™ Neural Compute API." />
-<link rel="canonical" href="https://github.intel.com/pages/MIG-Internal/ncsdk_staging_internal/ncapi/ncapi2/c_api/ncGraphOption_t.html" />
-<meta property="og:url" content="https://github.intel.com/pages/MIG-Internal/ncsdk_staging_internal/ncapi/ncapi2/c_api/ncGraphOption_t.html" />
+<link rel="canonical" href="https://github.intel.com/pages/MIG-Internal/ncs2beta_ncsdk/ncapi/ncapi2/c_api/ncGraphOption_t.html" />
+<meta property="og:url" content="https://github.intel.com/pages/MIG-Internal/ncs2beta_ncsdk/ncapi/ncapi2/c_api/ncGraphOption_t.html" />
 <script type="application/ld+json">
-{"description":"Documentation for the Intel® Movidius™ Neural Compute SDK and Intel® Movidius™ Neural Compute API.","@type":"WebPage","url":"https://github.intel.com/pages/MIG-Internal/ncsdk_staging_internal/ncapi/ncapi2/c_api/ncGraphOption_t.html","headline":"ncGraphOption_t enum [C NCAPI v2]","@context":"http://schema.org"}</script>
+{"description":"Documentation for the Intel® Movidius™ Neural Compute SDK and Intel® Movidius™ Neural Compute API.","@type":"WebPage","url":"https://github.intel.com/pages/MIG-Internal/ncs2beta_ncsdk/ncapi/ncapi2/c_api/ncGraphOption_t.html","headline":"ncGraphOption_t enum [C NCAPI v2]","@context":"http://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 
     <script>
@@ -162,7 +162,7 @@
                                 searchInput: document.getElementById('search-input'),
                                 resultsContainer: document.getElementById('results-container'),
                                 dataSource: '../../../search.json',
-                                searchResultTemplate: '<li><a href="https://github.intel.com/pages/MIG-Internal/ncsdk_staging_internal{url}" title="">{display}</a></li>',
+                                searchResultTemplate: '<li><a href="https://github.intel.com/pages/MIG-Internal/ncs2beta_ncsdk{url}" title="">{display}</a></li>',
                     noResultsText: '',
                             limit: 10,
                             fuzzy: true,
@@ -603,7 +603,7 @@
       <td>A null-terminated character array containing the name of the graph that was set with <a href="ncGraphCreate.html">ncGraphCreate()</a>. The maximum size of this array is NC_MAX_NAME_SIZE.</td>
     </tr>
     <tr>
-      <td>NC_RO_GRAPH_OPTION_CLASS_LIMIT</td>
+      <td>NC_RO_GRAPH_OPTION_<br />CLASS_LIMIT</td>
       <td>int</td>
       <td>Unbounded positive int</td>
       <td>The highest option class supported.</td>
@@ -615,15 +615,15 @@
       <td>The version of the compiled graph.</td>
     </tr>
     <tr>
-      <td>NC_RO_GRAPH_TIME_TAKEN_ARRAY_SIZE</td>
+      <td>NC_RO_GRAPH_TIME_<br />TAKEN_ARRAY_SIZE</td>
       <td>int</td>
       <td>Unbounded positive int</td>
       <td>The size of the NC_RO_GRAPH_TIME_TAKEN option array.</td>
     </tr>
     <tr>
-      <td>NC_RW_GRAPH_EXECUTORS_NUM</td>
+      <td>NC_RW_GRAPH_<br />EXECUTORS_NUM</td>
       <td>int</td>
-      <td>Positive int up to the device’s <a href="ncDeviceOption_t.html">NC_RO_DEVICE_MAX_EXECUTORS_NUM</a></td>
+      <td>Positive int up to the device’s <a href="ncDeviceOption_t.html">NC_RO_DEVICE_MAX_<br />EXECUTORS_NUM</a></td>
       <td><em>Reserved for future use.</em></td>
     </tr>
   </tbody>

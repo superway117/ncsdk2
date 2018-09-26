@@ -25,9 +25,9 @@
 #include "stdint.h"
 #include "stdlib.h"
 #include "string.h"
-
 #include <assert.h>
 #include <stdlib.h>
+
 #if (defined(_WIN32) || defined(_WIN64))
 #include "win_pthread.h"
 #include "win_semaphore.h"
@@ -35,6 +35,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 #endif
+
 #include "XLinkDispatcher.h"
 #include "XLinkPrivateDefines.h"
 
@@ -69,7 +70,7 @@ typedef struct{
 
     xLinkEventPriv_t* curProc;
     xLinkEventPriv_t* cur;
-    __attribute__((aligned(8))) xLinkEventPriv_t q[MAX_EVENTS];
+    __attribute__((aligned(64))) xLinkEventPriv_t q[MAX_EVENTS];
 
 }eventQueueHandler_t;
 typedef struct {
@@ -86,6 +87,11 @@ typedef struct {
     eventQueueHandler_t rQueue; //remote queue
     localSem_t eventSemaphores[MAXIMUM_SEMAPHORES];
 } xLinkSchedulerState_t;
+
+static xLinkEventPriv_t* getNextElementWithState(xLinkEventPriv_t* base, xLinkEventPriv_t* end,
+                                                        xLinkEventPriv_t* start, xLinkEventState_t state);
+
+static void markEventServed(xLinkEventPriv_t* event);
 
 
 #define CIRCULAR_INCREMENT(x, maxVal, base) \
@@ -141,7 +147,11 @@ sem_t addSchedulerSem;
 //below workaround for "C2088 '==': illegal for struct" error
 int pthread_t_compare(pthread_t a, pthread_t b)
 {
+#if (defined(_WIN32) || defined(_WIN64) )
+	return ((a.tid == b.tid));
+#else
     return  (a == b);
+#endif
 }
 
 static int unrefSem(sem_t* sem,  xLinkSchedulerState_t* curr) {
@@ -233,14 +243,35 @@ static void* eventReader(void* ctx)
         mvLog(MVLOG_DEBUG,"Reading %s (scheduler Id %d, fd %p)\n", TypeToStr(event.header.type),
             schedulerId, event.xLinkFD);
         int sc = glControlFunc->eventReceive(&event);
+
         if (sc) {
+            // Only run this logic on the host side, the FW does not need this logic
+#ifdef __PC__
+            xLinkSchedulerState_t *curr = &schedulerState[schedulerId];
+            // Same exception that is in eventReceive. Still break out of reading more events
+            if (event.header.type != USB_RESET_RESP)
+            {
+                mvLog(MVLOG_ERROR, "Failed to receive event, the device may have reset\n");
+
+                glControlFunc->closeLink(schedulerState[schedulerId].xLinkFD, 0);
+
+                // Find the next blocked event that the app is waiting on
+                // TODO will there be more than one?
+                xLinkEventPriv_t *e = getNextElementWithState(curr->lQueue.base, curr->lQueue.end, curr->lQueue.cur, EVENT_BLOCKED);
+
+                if (e != NULL)
+                {
+                    e->packet.header.flags.bitField.ack  = 0;
+                    e->packet.header.flags.bitField.nack = 1;
+                    markEventServed(e);
+                }
+            }
+#endif
             break;
         }
     }
     return 0;
 }
-
-
 
 static int isEventTypeRequest(xLinkEventPriv_t* event)
 {
@@ -269,7 +300,6 @@ static void markEventServed(xLinkEventPriv_t* event)
     }
     event->isServed = EVENT_SERVED;
 }
-
 
 static int dispatcherRequestServe(xLinkEventPriv_t * event, xLinkSchedulerState_t* curr){
     ASSERT_X_LINK(curr != NULL);
@@ -404,7 +434,7 @@ static void dispatcherReset(xLinkSchedulerState_t* curr)
 {
     ASSERT_X_LINK(curr != NULL);
 
-    glControlFunc->closeLink(curr->xLinkFD);
+    glControlFunc->closeLink(curr->xLinkFD, 1);
     if (sem_post(&curr->notifyDispatcherSem)) {
         mvLog(MVLOG_ERROR,"can't post semaphore\n"); //to allow us to get a NULL event
     }
@@ -412,6 +442,7 @@ static void dispatcherReset(xLinkSchedulerState_t* curr)
     while (event != NULL) {
        event = dispatcherGetNextEvent(curr);
     }
+
     event = getNextElementWithState(curr->lQueue.base, curr->lQueue.end, curr->lQueue.base, EVENT_PENDING);
     while (event != NULL) {
         markEventServed(event);
@@ -420,7 +451,7 @@ static void dispatcherReset(xLinkSchedulerState_t* curr)
     glControlFunc->resetDevice(curr->xLinkFD);
     curr->schedulerId = -1;
     numSchedulers--;
-    mvLog(MVLOG_INFO,"Reset Successfully\n");
+    mvLog(MVLOG_DEBUG,"Reset Successfully\n");
 }
 #if (defined(_WIN32) || defined(_WIN64))
 static void* __cdecl eventSchedulerRun(void* ctx)
@@ -458,6 +489,13 @@ static void* eventSchedulerRun(void* ctx)
 
     while (!curr->resetXLink) {
         event = dispatcherGetNextEvent(curr);
+        if(event == NULL)
+        {
+            mvLog(MVLOG_ERROR,"Dispatcher received NULL event!");
+            /// Skip the event instead of asserting, so only
+            /// the particular xlink chan will crash
+            continue;
+        }
         ASSERT_X_LINK(event->packet.xLinkFD == curr->xLinkFD);
         getRespFunction getResp;
         xLinkEvent_t* toSend;
@@ -485,7 +523,7 @@ static void* eventSchedulerRun(void* ctx)
         }
 
         //TODO: dispatcher shouldn't know about this packet. Seems to be easily move-able to protocol
-        if (event->origin == EVENT_REMOTE){
+        if (event->origin == EVENT_REMOTE) {
             if (event->packet.header.type == USB_RESET_REQ) {
                 curr->resetXLink = 1;
             }
